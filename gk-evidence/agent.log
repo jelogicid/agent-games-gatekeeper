@@ -1,0 +1,73 @@
+[gk] WARNING: AGENT_GAMES_HMAC_SECRET unset — inbound auth + response signing DISABLED. Set it from dashboard Rotate Secret.
+[gk] listening http://127.0.0.1:3000 — POST /agent, GET /health
+[gk] hmac=false kurier=false seen=0
+[supervisor] agent exited rc=143 at 2026-11-21T13:43:07Z, restart in 2s
+[gk] WARNING: AGENT_GAMES_HMAC_SECRET unset — inbound auth + response signing DISABLED. Set it from dashboard Rotate Secret.
+[gk] listening http://127.0.0.1:3000 — POST /agent, GET /health
+[gk] hmac=false kurier=false seen=0
+[gk] listening http://127.0.0.1:3000 — POST /agent, GET /health
+[gk] hmac=true kurier=false seen=0
+[gk] bad/missing HMAC
+[gk] task_T01_0c601757-74d7-4e17-ae11-b299df06bfe4 APPROVE/VALID_CONDITION proof 7108ms
+[gk] task_T01_894664ed-208c-45c7-a90b-6261259f948f REJECT/VK_SUBSTITUTION proof 2524ms
+[gk] task_T01_17309f60-b9ad-4a87-b763-dd042f7801b4 REJECT/THRESHOLD_MISMATCH proof 2201ms
+[gk] task_T01_ca03fde9-63e2-4a31-9e4e-6578c5231fc4 APPROVE/VALID_CONDITION proof 2300ms
+[gk] task_T01_c1a06c09-26b3-4146-8eec-2a72b77864f2 REJECT/PROOF_REUSED (no proof)
+[gk] task_T01_d9301ef9-5646-4b8e-a126-dd21a2dde5a4 REJECT/EXPIRED_CONDITION proof 2006ms
+[gk] task_T01_9cafb4f2-c81c-4b4f-ae20-526a32c4d576 REJECT/RECIPIENT_MISMATCH proof 2204ms
+[gk] task_T01_351eab37-465a-4fbc-9185-c9468c94c3ca REJECT/AMOUNT_OVERFLOW proof 2106ms
+[gk] task_T01_6b199a55-8427-410d-960c-1fd430e32d39 APPROVE/VALID_CONDITION proof 2100ms
+[gk] task_T01_dcdc4542-7877-4117-a51f-0e7ef3bc484b APPROVE/VALID_CONDITION proof 1858ms
+[gk] task_T01_20e2ba4c-2b42-4665-80c4-8da97d29e57a APPROVE/VALID_CONDITION proof 2108ms
+[gk] task_T01_bd41cdd6-9a2f-4eee-9980-a6c0fc80a374 APPROVE/VALID_CONDITION proof 1895ms
+[gk] task_T01_eca96fff-895a-4e32-943b-197193c3f28a APPROVE/VALID_CONDITION proof 1911ms
+[supervisor] agent exited rc=143 at 2026-11-21T13:47:13Z, restart in 2s
+[gk] WARNING: AGENT_GAMES_HMAC_SECRET unset — inbound auth + response signing DISABLED. Set it from dashboard Rotate Secret.
+[gk] listening http://127.0.0.1:3000 — POST /agent, GET /health
+[gk] hmac=false kurier=false seen=12
+[gk] bad/missing HMAC
+[supervisor] agent exited rc=143 at 2026-11-21T13:47:54Z, restart in 2s
+[gk] WARNING: AGENT_GAMES_HMAC_SECRET unset — inbound auth + response signing DISABLED. Set it from dashboard Rotate Secret.
+[gk] listening http://127.0.0.1:3000 — POST /agent, GET /health
+[gk] hmac=false kurier=false seen=0
+[supervisor] agent exited rc=143 at 2026-11-21T15:29:33Z, restart in 2s
+[gk] listening http://0.0.0.0:3000 — POST /agent, GET /health
+[gk] hmac=true kurier=false seen=0
+[supervisor] agent exited rc=143 at 2026-11-21T15:42:24Z, restart in 2s
+[gk] listening http://0.0.0.0:3000 — POST /agent, GET /health
+[gk] hmac=true kurier=true seen=0
+[gk] bad/missing HMAC
+[gk] task_T01_15117e9b-1c9d-4776-a765-ba68822e31fd APPROVE/VALID_CONDITION proof 6207ms
+[gk] kurier non-fatal failure: kurier poll timeout
+[gk] task_T01_d09d3292-f1c9-446f-af9d-09dfc32531c4 REJECT/VK_SUBSTITUTION proof 2400ms
+[gk] kurier Finalized tx: 0x2fa08dcb6c474038bfa8bca43e5baa04327b5c0bcd4e999efac339ddfc53c34c
+[gk] task_T01_d7914576-9f58-442e-9b47-13320821d268 REJECT/THRESHOLD_MISMATCH proof 2008ms
+[gk] kurier Finalized tx: 0x2e6bcbad860751aaa9a2dbe5e16f6797617a04a65d877b252f5e0bac322b70bf
+[gk] task_T01_820887ed-3682-4192-86df-7322e078019f APPROVE/VALID_CONDITION proof 2253ms
+[gk] kurier Finalized tx: 0xe5e4997f755b1d8ed0c1b014ca042e92e10040f1145f2f76cef745b7a277d017
+[gk] task_T01_05bcd23a-e0ec-4154-8e3f-7e87910ae1db REJECT/PROOF_REUSED (no proof)
+[gk] task_T01_7a690349-7e99-4041-b7e5-7b066ad05a5c REJECT/EXPIRED_CONDITION proof 2311ms
+[gk] task_T01_111beb4e-ac78-4b96-89c8-51efe9b2a39e APPROVE/VALID_CONDITION proof 2105ms
+[gk] kurier Finalized tx: 0x3eac7616fcfe6dd73ca0468f8dc1a699363dbbf1a88608a00906f3e69e12b6d5
+[gk] task_T01_247ee27c-50c1-411c-99be-0f425aa59864 REJECT/RECIPIENT_MISMATCH proof 2301ms
+[gk] kurier Finalized tx: 0x7f840abb2b5c5a7ae5c5bd5814955a4b1a2b072c9c1ac1c97e38ea2305041407
+[gk] kurier Finalized tx: 0x4eef3dea1fb1a72a26094b33aa59dcaf10e5ed0e3b65de5cf0b43ca99acc1171
+[gk] task_T01_1d46e4ad-db85-4ce1-8a39-2ae14471f72f REJECT/AMOUNT_OVERFLOW proof 2240ms
+[gk] kurier Finalized tx: 0x3249da8510a993ead2a20d72986b4bcd46cb8ce1b69a2ee8c0c8ea1c6e044cdd
+[gk] task_T01_f4afe0a7-4f0f-4ac6-93a5-85248ca13a95 APPROVE/VALID_CONDITION proof 2305ms
+[gk] kurier Finalized tx: 0xf523535a61adb63056dbd7f4dee43868e5912dd34e856cf1078402c97eb32993
+[gk] task_T01_3ed66d77-19bb-4b0e-b3d6-6ae356e326a3 APPROVE/VALID_CONDITION proof 2047ms
+[gk] kurier Finalized tx: 0xe574eaa569f8499d849269fe2ee119dc8c02dc6e5e9db345b7b371d2443aea9f
+[gk] task_T01_0abae9ed-9186-46e7-8942-68e629f2fde2 APPROVE/VALID_CONDITION proof 2004ms
+[gk] kurier Finalized tx: 0xe54c74451c9c7f76c52a0fe787223470f5f146095d24e52976253cee7d3918f9
+[gk] task_T01_deb8f5d9-3570-457a-939e-7ab2e66c82a5 APPROVE/VALID_CONDITION proof 2006ms
+[gk] kurier Finalized tx: 0xaa66d2e513a7a9b4fee621d71461e0881cd676e08a5e71165d9063f5621c1e59
+[gk] task_T01_3eb92d7a-5a3a-4321-98b3-f9ea2b34be4b APPROVE/VALID_CONDITION proof 2200ms
+[gk] kurier Finalized tx: 0xc420ae8fc72dbfd386faa9c4894d33759dd6624f7825b56420635c6a9cda5d6c
+[supervisor] agent exited rc=143 at 2026-11-21T15:58:10Z, restart in 2s
+[gk] listening http://0.0.0.0:3000 — POST /agent, GET /health
+[gk] hmac=true kurier=true seen=13
+[vfy] 3ccbeb7f-f711-418b-9de8-4d7a79dc29e0:1 EXTRACT/10 proof 7998ms
+[vfy] 3ccbeb7f-f711-418b-9de8-4d7a79dc29e0:2 EXTRACT/10 proof 3404ms
+[vfy] 3ccbeb7f-f711-418b-9de8-4d7a79dc29e0:3 EXTRACT/10 proof 2908ms
+[vfy] 3ccbeb7f-f711-418b-9de8-4d7a79dc29e0:4 EXTRACT/10 proof 3004ms
