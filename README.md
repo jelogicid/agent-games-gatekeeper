@@ -67,6 +67,46 @@ prove a wrong decision, so decision logic and circuit semantics must match exact
 3. Kurier mainnet key created, installed, proofs reach Finalized with a real txHash.
 4. Preflight passes; agent entered in Proof Gatekeeper.
 
+## Steal the VFY (second entry, committed-policy track)
+
+- Endpoint serves both events: gatekeeper tasks (`type: agent-games.proof-gatekeeper.v1`)
+  and VFY turn envelopes (no `type`; identified by `eventId: steal-the-vfy` / matchId+turn+state).
+- Policy is a secret file `vfy-policy.json` (params, salt, commitment; gitignored, 600):
+  `commitment = Poseidon([p0..p7, salt])` — exactly what circuits/vfy-policy.circom checks.
+- Committed strategy in use: `[10, 0, 0, 0, 0,0,0,0]` = ALWAYS EXTRACT 10 while the
+  opponent has anything (never fortify, no hold priority). Extract-vs-extract nets 0,
+  extract-vs-fortify nets +4 in the extractor's favour, so greedy extraction dominates.
+- Per turn: policy -> circuit inputs -> Groth16 proof (~3s on the VPS) -> signed response
+  `{matchId, turn, action, policyProof:{circuitVersion, proof, public_signals}}`.
+  Per (matchId,turn) idempotent replay. vfy-test.mjs = 42 checks incl. proof verifies
+  against the official vfy VK and proofTag = Poseidon(matchId, turn, circuitVersion).
+- Circuit facts (from the official reference source): 9 public signals in the order
+  proofTag, commitment, matchId, turnNumber, selfBalance, opponentBalance, action,
+  amount, circuitVersion; action 0/1/2 = HOLD/FORTIFY/EXTRACT; extractAmount in [1,10];
+  params[4..7] forced 0. Reference: github.com/smilewithkhushi/steal-the-vfy-reference.
+- Entry is LOCKED while a Swiss round is live ("Steal the VFY entry is locked while a
+  tournament is in progress") — retry `updateAgentEvents` + `registerStrategyCommitmentAction`
+  in the gap between rounds (scratch/stfy_watch.py).
+
+## Season 01 final result (competition closed 21 Nov 2026 22:00 UTC)
+
+- Agent `GATEKEEPER-4080` stayed live to the whistle: /health uptime 21.7ks,
+  hmac+kurier configured, 14 tasks answered, 13 proof_tx tracked, 12 Kurier Finalized.
+- Leaderboard final (`/api/leaderboard`, 521 entries): rank 387, gatekeeper 0, vfy 0, total 0,
+  gkCorrect 0, gkTimeouts 0 — the agent was never paired into a scored round.
+  Winning totals: 855.9 / 836.4 / 742.6.
+- Proof Gatekeeper: rounds 01–08 all closed as RESULTS (13–20 Nov); the 21 Nov
+  compensatory rounds never opened ("NO LIVE ROUND" through 22:00 UTC). Entering on the
+  final day cannot earn points — scored rounds are the only source.
+- Steal the VFY: entry stayed locked for the whole session (200 automated attempts over
+  5.5h + manual retries, all "locked while a tournament is in progress"); the event page
+  sat at R5 / 53 agents paired / 61 matches with "NO LIVE MATCHES". Registration must
+  happen in a gap before a Swiss round pairs, not on the closing day.
+- Lesson recorded for next season: register the agent AND the strategy commitment on day
+  one of the registration window (21 Oct), then keep the endpoint healthy across all 8
+  scored rounds — the score model is cumulative, so a single-day join scores zero no matter
+  how good the agent is.
+
 ## Scoring
 
 +12 correct (verified), -6 approve trap, -3 reject valid, -2 timeout, -2 missing/
