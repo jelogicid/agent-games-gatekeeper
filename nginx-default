@@ -1,0 +1,8 @@
+server {
+    listen 80 default_server;
+    root /home/clientuser/data/public;
+    index index.php index.html index.htm;
+    include /home/clientuser/agent-games/gk-nginx.conf;
+    location / { try_files $uri $uri/ /index.php?$query_string; }
+    location ~ \.php$ { include snippets/fastcgi-php.conf; fastcgi_pass unix:/run/php/php8.3-fpm.sock; }
+}
