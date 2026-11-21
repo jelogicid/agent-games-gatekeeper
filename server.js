@@ -245,6 +245,96 @@ function readRawBody(req) {
   });
 }
 
+// ---------------------------------------------------------------- Steal the VFY
+// Committed policy: commitment = Poseidon(strategyParams[8], salt) exactly as the
+// official vfy-policy circuit checks it. Strategy is read from VFY_POLICY_FILE.
+const VFY_POLICY_FILE = process.env.VFY_POLICY_FILE || path.join(STATE_DIR, 'vfy-policy.json');
+const VFY_WASM = process.env.VFY_WASM || path.join(__dirname, 'circuits', 'vfy-policy.wasm');
+const VFY_ZKEY = process.env.VFY_ZKEY || path.join(__dirname, 'circuits', 'vfy-policy_final.zkey');
+const VFY_PROOF_TIMEOUT_MS = parseInt(process.env.VFY_PROOF_TIMEOUT_MS || '45000', 10);
+
+let vfyPolicy = null;
+try { vfyPolicy = JSON.parse(fs.readFileSync(VFY_POLICY_FILE, 'utf8')); }
+catch { vfyPolicy = null; }
+
+const ACTION_CODE = { HOLD: 0, FORTIFY: 1, EXTRACT: 2 };
+
+// Mirrors the circuit's policy branch order exactly.
+function policyAction(selfBalance, opponentBalance, params) {
+  const [extractAmount, fortifyThreshold, extractThreshold, holdPriority] = params;
+  if (selfBalance < fortifyThreshold) return { type: 'FORTIFY', amount: 0 };
+  if (opponentBalance > extractThreshold && holdPriority === 0) return { type: 'EXTRACT', amount: extractAmount };
+  return { type: 'HOLD', amount: 0 };
+}
+
+async function vfyProof(commitment, matchIdField, turnNumber, selfBalance, opponentBalance, action) {
+  const input = {
+    commitment: commitment.toString(),
+    matchId: matchIdField.toString(),
+    turnNumber: String(turnNumber),
+    selfBalance: String(selfBalance),
+    opponentBalance: String(opponentBalance),
+    action: String(ACTION_CODE[action.type]),
+    amount: String(action.amount || 0),
+    circuitVersion: '1',
+    salt: BigInt(vfyPolicy.salt).toString(),
+    strategyParams: vfyPolicy.params.map(String),
+  };
+  const { proof, publicSignals } = await snarkjs.groth16.fullProve(input, VFY_WASM, VFY_ZKEY);
+  return { proof, publicSignals };
+}
+
+const vfyByTurn = {}; // `${matchId}:${turn}` -> signed response body
+
+async function handleVfyTurn(res, turn) {
+  const key = `${turn.matchId}:${turn.turn}`;
+  if (vfyByTurn[key]) {
+    const body = Buffer.from(JSON.stringify(vfyByTurn[key]));
+    const headers = { 'content-type': 'application/json', 'content-length': body.length };
+    if (HMAC_SECRET) headers['x-agent-games-signature'] = crypto.createHmac('sha256', HMAC_SECRET).update(body).digest('hex');
+    res.writeHead(200, headers);
+    return res.end(body);
+  }
+  if (!vfyPolicy) {
+    // Without the opening (params+salt) no valid proof exists; answer HOLD, signed.
+    return sendJson(res, 200, {
+      matchId: turn.matchId, turn: turn.turn, action: { type: 'HOLD' },
+      agentTimestamp: new Date().toISOString(), idempotencyKey: key,
+    });
+  }
+  const selfBalance = Number(turn.state?.selfBalance ?? 0);
+  const opponentBalance = Number(turn.state?.opponentBalance ?? 0);
+  const action = policyAction(selfBalance, opponentBalance, vfyPolicy.params);
+
+  const commitment = BigInt(vfyPolicy.commitment);
+  const matchIdHex = String(turn.matchId).replace(/-/g, '');
+  const matchIdField = BigInt('0x' + matchIdHex);
+
+  const t0 = Date.now();
+  let policyProof = { circuitVersion: vfyPolicy.circuitVersion || 'v1' };
+  try {
+    const { proof, publicSignals } = await withTimeout(
+      vfyProof(commitment, matchIdField, turn.turn, selfBalance, opponentBalance, action),
+      VFY_PROOF_TIMEOUT_MS, 'vfy-prove');
+    policyProof.proof = proof;
+    policyProof.public_signals = publicSignals;
+    console.log(`[vfy] ${key} ${action.type}${action.amount ? '/' + action.amount : ''} proof ${Date.now() - t0}ms`);
+  } catch (e) {
+    console.error(`[vfy] ${key} proof FAILED:`, e.message);
+  }
+
+  const response = {
+    matchId: turn.matchId,
+    turn: turn.turn,
+    action: action.type === 'EXTRACT' ? { type: 'EXTRACT', amount: action.amount } : { type: action.type },
+    policyProof,
+    agentTimestamp: new Date().toISOString(),
+    idempotencyKey: crypto.randomUUID(),
+  };
+  vfyByTurn[key] = response;
+  return sendJson(res, 200, response);
+}
+
 // ---------------------------------------------------------------- handler
 async function handleTask(req, res, rawBody) {
   if (!verifySignature(rawBody, req.headers['x-agent-games-signature'])) {
@@ -257,6 +347,11 @@ async function handleTask(req, res, rawBody) {
 
   if (task.type === 'agent-games.preflight.v1') {
     return sendJson(res, 200, { ok: true, protocolVersion: 'v1' });
+  }
+  // Steal the VFY turn envelope carries no `type` — it is identified by the
+  // match/turn fields documented in the build guide.
+  if (task.eventId === 'steal-the-vfy' || (task.matchId && task.turn !== undefined && task.state)) {
+    return await handleVfyTurn(res, task);
   }
   if (task.type && task.type !== 'agent-games.proof-gatekeeper.v1') {
     return sendJson(res, 400, { error: 'unknown task type' });
@@ -329,6 +424,8 @@ const server = http.createServer(async (req, res) => {
         kurier_configured: Boolean(KURIER_API_KEY),
         seen_proof_refs: seenProofTx.size,
         tasks_answered: Object.keys(decisionsByTask).length,
+        vfy_policy: vfyPolicy ? vfyPolicy.commitment.slice(0, 12) + '…' : null,
+        vfy_turns: Object.keys(vfyByTurn).length,
       });
     }
     if (req.method === 'POST' && ['/agent', '/'].includes(url.pathname)) {

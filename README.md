@@ -46,23 +46,26 @@ prove a wrong decision, so decision logic and circuit semantics must match exact
 - Path: ~/agent-games, supervisor `bash run.sh` (nohup setsid), node 127.0.0.1:3000
 - Public endpoint: **https://ffasf.srv2.host4.ai/agent** (Caddy TLS -> nginx -> node)
 - State: seen.json (proof_tx reuse set) + decisions.json (idempotency) — persistent disk.
-- .env (chmod 600): AGENT_GAMES_HMAC_SECRET, KURIER_API_KEY. Currently EMPTY =
-  fail-closed (401 to everything) until the real dashboard secret is set.
+- Registered on the dashboard as agent `GATEKEEPER-4080`
+  (agentId 419c05e8-433e-48a9-8151-4d5eccffd06f), event Proof Gatekeeper, status **active**.
+  Repo field must be a public repo owned by the LINKED GitHub account
+  (linked: mjasb1 -> https://github.com/mjasb1/agent-games-gatekeeper).
+- `.env` (chmod 600): AGENT_GAMES_HMAC_SECRET + KURIER_API_KEY both set.
+  `/health` reports hmac_configured:true kurier_configured:true.
+- Preflight: PASS ("Preflight accepted · 200 OK", 688ms) via dashboard preflightAgent.
+- End-to-end through public TLS with the real secret: 105/105 harness checks pass.
+  A real task returns in ~24s (proof ~2-6s, Kurier Finalized ~17s) and proof_tx is the
+  Kurier on-chain tx hash (zkverify.subscan.io extrinsic).
 - Keepalive: external curl of /health every 3 min (host4 free tier stops idle boxes).
 - No cron daemon in container; after a panel Restart, re-run:
   `cd ~/agent-games && nohup setsid bash run.sh >/dev/null 2>&1 < /dev/null &`
 
-## Go-live checklist (user actions)
+## Go-live checklist (done)
 
-1. https://agentgames.zkverify.io/register — sign in with X or wallet; connect
-   GitHub + wallet (prize eligibility).
-2. Dashboard -> register agent endpoint `https://ffasf.srv2.host4.ai/agent`.
-3. Rotate Secret -> copy the one-time plaintext into ~/agent-games/.env on the VPS
-   (AGENT_GAMES_HMAC_SECRET=...). Never paste it into chat. Supervisor picks it up
-   on next node restart (kill the node PID; run.sh respawns in 2s).
-4. https://kurier.xyz -> mainnet signup (free) -> KURIER_API_KEY into same .env.
-5. Dashboard: run preflight (must pass) + at least one practice task.
-6. Enter Proof Gatekeeper. Deadline: 21 Nov 2026 22:00 UTC.
+1. Agent registered with endpoint https://ffasf.srv2.host4.ai/agent — active.
+2. Secret rotated at registration (shown once), installed into VPS .env.
+3. Kurier mainnet key created, installed, proofs reach Finalized with a real txHash.
+4. Preflight passes; agent entered in Proof Gatekeeper.
 
 ## Scoring
 

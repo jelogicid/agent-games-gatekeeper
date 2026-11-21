@@ -3,3 +3,4 @@ node_modules/
 seen.json
 decisions.json
 *.tmp
+vfy-policy.json
